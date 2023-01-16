@@ -1,0 +1,82 @@
+################################################################ LDAP INSTALLATION ON DEBIAN 11 (Bulleyes)#########################################################################################
+
+1) sudo apt-update
+2) sudo apt-upgrade
+3) sudo apt install slapd ldap-utils
+4)  sudo hostnamectl set-hostname ldap.mydomain.local
+5) vim /etc/hosts     # for setting up the LDAP server properties. Enter following lines :
+- On the right-side your have to specify to LDAP_Server_IP
+-On the left-side : ldap.mydomain.local  ldap    # observe the space between ldap.mydomain.local and  ldap
+- save and close the file
+6) su - # in order to be super root on LDAP-directory
+7) dpkg-reconfigure slapd
+8) slapcat # for checking wether the previously file (/etc/hosts) has been taken into account
+9) systemctl restart slapd
+10) systemctl status slapd
+11) Now we are looking forward to adding user to our ldap-server
+we have to create a users-files :
+vim /etc/ldap/users.ldif 
+Enter these lines :
+
+dn:ou=people,dc=mydomain,dc=local
+objectClass:organizationalUnit
+ou:people
+
+save and close the file. On the command we'll load the configuration that we have just written in users.ldif-file (you'll be asked for your ldap/root password):
+
+sudo ldapadd  -D  "cn=admin,dc=mydomain,dc=local" -W -H ldapi:/// -f /etc/ldap/users.ldif
+
+12 ) creation of a user for example alice
+
+vim alice.ldif
+
+enter following lines :
+
+dn:cn=alice,ou=people,dc=mydomain,dc=local
+objectClass:top
+objectClass:account
+objectClass:posixAccount
+objectClass:shadowAccount
+cn:alice
+uid:alice
+uidNumber: 10001
+gidNumber: 10001
+homeDirectory : /home/alice
+userPassword : AlicePassword
+loginShell:/bin/bash
+
+save and close the file
+
+ sudo ldapadd  -D  "cn=admin,dc=mydomain,dc=local" -W -H ldapi:/// -f alice.ldif #loading configuration
+
+ ldapsearch -x -b "dc=mydomain,dc=local" ou # for checking. You would see all  information about user alice and her group (people)
+
+
+ ################################################## Configuration is up !!! ##############################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
